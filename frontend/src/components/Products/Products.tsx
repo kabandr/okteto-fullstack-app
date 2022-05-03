@@ -1,4 +1,3 @@
-import { listenerCount } from "process"
 import { useEffect, useState } from "react"
 
 function Products() {
