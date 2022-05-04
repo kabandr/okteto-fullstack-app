@@ -1,0 +1,52 @@
+name: okteto-fullstack-app
+
+# The build section defines how to build the images of your development environment
+# More info: https://www.okteto.com/docs/reference/manifest/#build
+
+build:
+  frontend:
+    context: frontend
+  backend:
+    context: backend
+
+# The deploy section defines how to deploy your development environment
+# More info: https://www.okteto.com/docs/reference/manifest/#deploy
+
+deploy:
+  commands:
+    - name: Deploy PostreSQL database
+      command: helm upgrade --install postgresql bitnami/postgresql -f postgresql/values.yml --version 10.16.2
+    - name: Deploy Backend
+      command: helm upgrade --install frontend frontend/chart --set image=${OKTETO_BUILD_BACKEND_IMAGE}
+    - name: Deploy Frontend
+      command: helm upgrade --install frontend frontend/chart --set image=${OKTETO_BUILD_FRONTEND_IMAGE}
+
+# The dependencies section defines other git repositories to be deployed as part of your development environment
+# More info: https://www.okteto.com/docs/reference/manifest/#dependencies
+# dependencies:
+#   - https://github.com/okteto/sample
+# The dev section defines how to activate a development container
+# More info: https://www.okteto.com/docs/reference/manifest/#dev
+
+dev:
+  frontend:
+    image: okteto/node:16
+    command: bash
+    workdir: /usr/src/app
+    sync:
+      - .:/usr/src/app
+    environment:
+      - name=$USER
+    forward:
+      - 3000:3000
+
+  backend:
+    image: okteto/node:16
+    command: bash
+    workdir: /usr/src/app
+    sync:
+      - .:/usr/src/app
+    environment:
+      - name=$USER
+    forward:
+      - 5000:5000
