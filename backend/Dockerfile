@@ -1,12 +1,19 @@
 FROM node:16-alpine
-ENV NODE_ENV=production
 
-WORKDIR /app
+ADD package.json /tmp/package.json
 
-COPY ["package.json", "package-lock.json*", "./"]
+ADD yarn.lock /tmp/yarn.lock
 
-RUN yarn install --production
+RUN rm -rf build
 
-COPY . .
+RUN cd /tmp && yarn install
 
-CMD [ "yarn", "server.js" ]
+ADD ./ /src
+
+RUN rm -rf src/node_modules && cp -a /tmp/node_modules /src/
+
+WORKDIR /src
+
+RUN yarn build
+
+CMD ["node", "build/server.js"]
